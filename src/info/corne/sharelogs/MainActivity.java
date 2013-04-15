@@ -1,7 +1,9 @@
 package info.corne.sharelogs;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import info.corne.sharelogs.Compress;
 import info.corne.sharelogs.R;
@@ -61,7 +63,7 @@ public class MainActivity extends Activity {
 				String[] mkdir = {"mkdir", dir};
 				ShellCommand.run(mkdir);
 				
-				String[] orgfiles = {"/devlog/kernel_log", "/devlog/system_log", "/proc/last_kmsg", "/proc/kmsg"};
+				String[] orgfiles = {"/devlog/kernel_log", "/devlog/system_log", "/proc/last_kmsg"};
 				ArrayList<String> zipfiles = new ArrayList<String>();
 				
 				for(int i = 0; i < orgfiles.length; i++)
@@ -79,8 +81,12 @@ public class MainActivity extends Activity {
 				String[] files = new String[zipfiles.size()];
 				files = zipfiles.toArray(files);
 				
+				SimpleDateFormat s = new SimpleDateFormat("yyyyMMddhhmm");
+				final String format = s.format(new Date());
+				System.out.println(format);
+				
 				new Compress(files, dir + 
-						"/logs_collection.zip").compress();
+						"/logs_collection-" + format + ".zip").compress();
 				runOnUiThread(new Runnable() {
 					
 					@Override
@@ -89,7 +95,7 @@ public class MainActivity extends Activity {
 						if(share)
 						{
 							Intent share = new Intent(Intent.ACTION_SEND);
-							String uri = "file://" + dir + "/logs_collection.zip";
+							String uri = "file://" + dir + "/logs_collection-" + format + ".zip";
 							share.setType("application/octet-stream");
 							share.putExtra(Intent.EXTRA_STREAM, Uri.parse(uri));
 							startActivity(Intent.createChooser(share, "Share Logs"));
@@ -97,7 +103,7 @@ public class MainActivity extends Activity {
 						else
 						{
 							Toast.makeText(getApplicationContext(), "The logs are now stored in " + dir + 
-									"/logs_collection.zip.", Toast.LENGTH_LONG).show();
+									"/logs_collection-" + format + ".zip", Toast.LENGTH_LONG).show();
 						}
 					}
 				});
